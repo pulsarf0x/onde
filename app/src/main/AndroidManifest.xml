@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Network permissions for AirPlay discovery and streaming -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- Android 16+/17 local network protection (enforced for newer target SDKs; declared ahead). -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+    
+    <!-- Audio capture permission -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- Foreground service permissions -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <queries>
+        <package android:name="com.spotify.music" />
+        <package android:name="deezer.android.app" />
+        <package android:name="com.google.android.apps.youtube.music" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:enableOnBackInvokedCallback="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AirPlayStreamer"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="35">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.AirPlayStreamer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
+
+        <activity
+            android:name=".ShortcutActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.AirPlayStreamer.Transparent">
+            <intent-filter>
+                <action android:name="app.onde.audio.shortcut.PLAY" />
+                <action android:name="app.onde.audio.shortcut.STOP" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".HelpActivity" android:exported="false" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AirPlayStreamer"/>
+
+        <activity
+            android:name=".TileDeviceActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.AirPlayStreamer.Dialog">
+            <!-- Long-pressing the Quick Settings tile opens the speaker picker. -->
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.AudioCaptureService"
+            android:foregroundServiceType="mediaProjection|mediaPlayback"
+            android:exported="false" />
+
+        <!-- Native MediaRoute2ProviderService with manual AndroidX extras injection -->
+        <service
+            android:name=".router.AirPlayRouteProviderService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ROUTE_PROVIDER">
+            <intent-filter>
+                <action android:name="android.media.MediaRoute2ProviderService" />
+            </intent-filter>
+        </service>
+
+        <!-- Transparent bridge: handles MediaProjection consent on behalf of AirPlayRouteProvider -->
+        <activity
+            android:name=".router.MediaProjectionConsentActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.AirPlayStreamer.Transparent" />
+
+        <!-- Quick Settings Tile -->
+        <service
+            android:name=".service.AirPlayTileService"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:icon="@drawable/ic_speaker"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
+        <receiver
+            android:name=".AirPlayWidget"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_airplay_info" />
+        </receiver>
+
+        <!-- Shizuku (optional privileged helper) -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <!-- NotificationListenerService for MediaSession access -->
+        <service
+            android:name=".service.NotificationListener"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

@@ -1,0 +1,109 @@
+package app.onde.audio.ui
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import app.onde.audio.discovery.AirPlayDevice
+import app.onde.audio.discovery.DiscoveryRepository
+import app.onde.audio.engine.SessionState
+import app.onde.audio.engine.SinkFactory
+import app.onde.audio.engine.SpeakerStatus
+import app.onde.audio.engine.Transport
+import app.onde.audio.service.AudioCaptureService
+import app.onde.audio.service.MediaInfoTracker
+import app.onde.audio.util.Prefs
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+
+data class MainUiState(
+    val rows: List<SpeakerRow> = emptyList(),
+    val session: SessionState = SessionState(),
+    val searching: Boolean = true,
+)
+
+class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository = DiscoveryRepository.getInstance(application)
+    private val prefs = Prefs(application)
+    private val manualDevices = MutableStateFlow<List<AirPlayDevice>>(emptyList())
+
+    private val tracker = MediaInfoTracker(application)
+    val mediaInfo: StateFlow<MediaInfoTracker.MediaInfo> = tracker.mediaInfo
+
+    val uiState: StateFlow<MainUiState> = combine(
+        repository.devices, manualDevices, AudioCaptureService.state
+    ) { discovered, manual, session ->
+        val all = (discovered + manual.filter { m -> discovered.none { it.identity == m.identity } })
+        val rows = all.map { d ->
+            SpeakerRow(d, session.speaker(d.identity), SinkFactory.transportFor(d, prefs.preferAirPlay2))
+        }.sortedWith(
+            compareByDescending<SpeakerRow> { it.active }
+                .thenByDescending { it.supported }
+                .thenBy { it.device.displayName.lowercase() }
+        )
+        MainUiState(rows = rows, session = session, searching = all.isEmpty())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState())
+
+    init {
+        repository.startDiscovery()
+        tracker.start()
+        manualDevices.value = prefs.manualSpeakers.mapNotNull { manualDevice(it) }
+    }
+
+    /** "host:port" → a RAOP device (manual entries are AirPlay 1 unless the port is 7000). */
+    private fun manualDevice(spec: String): AirPlayDevice? {
+        val host = spec.substringBefore(":").trim().ifEmpty { return null }
+        val port = spec.substringAfter(":", "5000").toIntOrNull() ?: 5000
+        return AirPlayDevice(
+            name = host, host = host, port = port, deviceId = "manual_$host",
+            protocolVersion = 1, raopPort = port, identity = "manual_$host:$port",
+        )
+    }
+
+    fun addManualSpeaker(spec: String) {
+        prefs.manualSpeakers = prefs.manualSpeakers + spec
+        manualDevice(spec)?.let { addManualDevice(it) }
+    }
+
+    fun removeManualSpeaker(identity: String) {
+        prefs.manualSpeakers = prefs.manualSpeakers.filterNot { "manual_$it" == identity }.toSet()
+        manualDevices.value = manualDevices.value.filterNot { it.identity == identity }
+    }
+
+    fun refreshTracker() = tracker.tryRegister()
+
+    fun onForeground() = repository.ensureFresh()
+
+    fun addManualDevice(device: AirPlayDevice) {
+        manualDevices.value = manualDevices.value.filterNot { it.identity == device.identity } + device
+    }
+
+    fun refreshDiscovery() = repository.refresh()
+
+    /** Track progress 0..1, or null when the duration is unknown. */
+    fun trackProgress(): Float? {
+        val duration = tracker.mediaInfo.value.duration
+        if (duration <= 0) return null
+        return (tracker.currentPosition().toFloat() / duration).coerceIn(0f, 1f)
+    }
+
+    fun togglePlayback() = tracker.togglePlayback()
+    fun next() = tracker.next()
+    fun previous() = tracker.previous()
+
+    fun playingNames(): String = uiState.value.session.speakers
+        .filter { it.status == SpeakerStatus.PLAYING }.joinToString(" + ") { it.name.lowercase() }
+
+    override fun onCleared() {
+        repository.stopDiscovery()
+        tracker.stop()
+        super.onCleared()
+    }
+
+    companion object {
+        fun isSupported(transport: Transport) = transport != Transport.UNSUPPORTED
+    }
+}

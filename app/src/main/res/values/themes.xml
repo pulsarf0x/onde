@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Expressive Theme with Dynamic Colors -->
+    <style name="Theme.AirPlayStreamer" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Dynamic colors will be applied automatically on Android 12+ -->
+        <!-- These are fallback colors for older devices -->
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        <item name="colorPrimaryContainer">@color/md_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_on_surface</item>
+        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="colorSurfaceContainerHigh">@color/md_surface_container_high</item>
+        <item name="android:colorBackground">@color/md_surface</item>
+
+        <!-- Edge-to-edge: Translucent status bar (visible icons) -->
+        <item name="android:statusBarColor">@color/status_bar_scrim</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Expressive shapes - larger corner radii -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.AirPlay.SmallComponent</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.AirPlay.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.AirPlay.LargeComponent</item>
+    </style>
+    
+    <!-- Expressive Shape Styles -->
+    <style name="ShapeAppearance.AirPlay.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">12dp</item>
+    </style>
+    
+    <style name="ShapeAppearance.AirPlay.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">20dp</item>
+    </style>
+    
+    <style name="ShapeAppearance.AirPlay.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerSize">28dp</item>
+    </style>
+    
+    <style name="ShapeAppearance.AirPlay.TopSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Expressive Button Style -->
+    <style name="Widget.AirPlay.Button.Expressive" parent="Widget.Material3.Button">
+        <item name="cornerRadius">28dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    
+    <!-- Expressive Card Style -->
+    <style name="Widget.AirPlay.Card.Expressive" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+    
+    <!-- Dynamic Color Theme for Android 12+ -->
+    <style name="Theme.AirPlayStreamer.Dynamic" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.AirPlay.SmallComponent</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.AirPlay.MediumComponent</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.AirPlay.LargeComponent</item>
+    </style>
+
+    <style name="Theme.AirPlayStreamer.Dialog" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <!-- Invisible trampoline (permission/consent flows) -->
+    <style name="Theme.AirPlayStreamer.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

@@ -24,7 +24,7 @@ object LogServer {
     private val dateFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
     
     fun start() {
-        if (running) return
+        if (!app.onde.audio.BuildConfig.DEBUG || running) return
         running = true
         
         thread(name = "LogServer") {

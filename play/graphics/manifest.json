@@ -1,0 +1,54 @@
+{
+  "source": "Icon exported from existing Android vector mark; feature composition in tools/render_store_assets.swift. Screenshots captured from the signed 0.2.0 release on Android 16 emulator, Wi-Fi disabled to avoid private device names/IPs. Opaque export only; no invented receivers or playback.",
+  "assets": [
+    {
+      "file": "feature-1024x500.png",
+      "width": 1024,
+      "height": 500,
+      "pngColorType": 2,
+      "sha256": "fcc5f6d5eb498ab215a26bc45f239d07a136b8101a1c472fccbf3cc4676d3168"
+    },
+    {
+      "file": "icon-512.png",
+      "width": 512,
+      "height": 512,
+      "pngColorType": 6,
+      "sha256": "c1406d3c3f32e4b8af1785f8c251cd152804fb9dfcd672863c922ca6117bd10e"
+    },
+    {
+      "file": "screenshots/01-accueil.png",
+      "width": 1080,
+      "height": 1920,
+      "pngColorType": 2,
+      "sha256": "7b5a1cb55079404a58cf07c7748de28f3fe7819f644a7f46111afb2c06a0e6e6"
+    },
+    {
+      "file": "screenshots/02-reglages.png",
+      "width": 1080,
+      "height": 1920,
+      "pngColorType": 2,
+      "sha256": "6b7b4ffe3ddf9c0826c2ebb56b513f2a31d1e24107c7d647e80606c9b37da707"
+    },
+    {
+      "file": "screenshots/03-aide.png",
+      "width": 1080,
+      "height": 1920,
+      "pngColorType": 2,
+      "sha256": "7807ae6a374df70e7b097a75dac9b793d64e90f661cb4e3e7c5a6e17d8fe4061"
+    },
+    {
+      "file": "screenshots/04-confidentialite.png",
+      "width": 1080,
+      "height": 1920,
+      "pngColorType": 2,
+      "sha256": "2e423cbab3598ee2d48b6bf99254aebdd7696de5f4ada871dd1caac2b847f4b2"
+    },
+    {
+      "file": "screenshots/05-accueil-sombre.png",
+      "width": 1080,
+      "height": 1920,
+      "pngColorType": 2,
+      "sha256": "7255380c4bd94b0dd62eee6af9940641327a462f78bb9e6d249cc31f69a85911"
+    }
+  ]
+}

@@ -414,7 +414,7 @@ class MainActivity : AppCompatActivity() {
             shizuku == ShizukuManager.Status.READY && (needsProjectionApproval || !hasListener || !StreamController.hasRuntimePermissions(this)) -> Setup.SHIZUKU_SETUP
             !StreamController.hasRuntimePermissions(this) -> Setup.PERMISSIONS
             !hasListener && prefs.showNowPlaying -> Setup.NOTIFICATION_ACCESS
-            shizuku == ShizukuManager.Status.NOT_INSTALLED && needsProjectionApproval &&
+            BuildConfig.ENABLE_SHIZUKU && shizuku == ShizukuManager.Status.NOT_INSTALLED && needsProjectionApproval &&
                 !prefs.raw.getBoolean("shizuku_tip_dismissed", false) -> Setup.SHIZUKU_TIP
             else -> null
         }

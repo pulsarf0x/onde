@@ -1,0 +1,1 @@
+Stream permitted Android app audio to your AirPlay speakers over Wi-Fi.

@@ -100,8 +100,10 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         section("Options avancées")
+        if (BuildConfig.ENABLE_SHIZUKU) {
         action("Shizuku (facultatif)", { shizukuSummary() }) { onShizukuClicked() }
         switch("Capture via Shizuku", "Utiliser ce mode si Shizuku est installé et autorisé. Sinon, utiliser l’autorisation Android standard.", prefs.useShizukuCapture) { prefs.useShizukuCapture = it }
+        }
         action("Nom sur les enceintes", { prefs.senderName }) { editSenderName() }
         action("Ajouter une enceinte par IP", { "Pour un récepteur qui n’apparaît pas automatiquement" }) { addManualDevice() }
         action("Version et licence", { "Onde ${BuildConfig.VERSION_NAME} · basé sur CenturyPlay · GNU AGPL v3" }) {

@@ -21,18 +21,32 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
 
       - name: Install SDK and native build tools
-        run: sdkmanager "platforms;android-35" "build-tools;34.0.0" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1" > /dev/null
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1" > /dev/null
 
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build and check
-        run: ./gradlew assembleDebug testDebugUnitTest lintDebug --stacktrace
+        run: ./gradlew assembleDebug assembleRelease bundleRelease testDebugUnitTest testReleaseUnitTest lintDebug lintRelease --stacktrace
 
       - name: Verify native library packaging
         run: python3 tools/verify_native_apk.py app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Verify release native libraries
+        run: python3 tools/verify_native_apk.py app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Verify release policy and bundle
+        run: python3 tools/verify_release.py app/build/outputs/bundle/release/app-release.aab
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: onde-release-unsigned
+          path: app/build/outputs/bundle/release/app-release.aab
 
       - uses: actions/upload-artifact@v4
         with:
@@ -45,6 +59,6 @@ jobs:
         with:
           name: onde-validation
           path: |
-            app/build/reports/tests/testDebugUnitTest/
-            app/build/reports/lint-results-debug.*
+            app/build/reports/tests/
+            app/build/reports/lint-results-*
           if-no-files-found: ignore

@@ -1,0 +1,1 @@
+Test release 0.2.0: Android 16 preparation, in-app privacy policy, explicit capture stop and standard release without privileged tools. Physical-device compatibility remains under evaluation.

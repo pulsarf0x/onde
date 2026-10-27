@@ -81,7 +81,7 @@ class Prefs(context: Context) {
 
     /** Capture through Shizuku (no consent dialog, phone stays silent) when available. */
     var useShizukuCapture: Boolean
-        get() = raw.getBoolean("use_shizuku_capture", true)
+        get() = app.onde.audio.BuildConfig.ENABLE_SHIZUKU && raw.getBoolean("use_shizuku_capture", true)
         set(v) = raw.edit().putBoolean("use_shizuku_capture", v).apply()
 
     /** List AirPlay speakers in the system Output Switcher of whatever app is playing. */

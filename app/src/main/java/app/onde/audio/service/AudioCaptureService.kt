@@ -182,6 +182,11 @@ class AudioCaptureService : Service() {
             ACTION_STOP -> {
                 prefs.autoPlaySuppressedUntil = System.currentTimeMillis() + 60 * 60_000L
                 endSession("stopped by user")
+                // Explicit Stop releases consent immediately; no hidden standby session.
+                releaseProjection()
+                standbyJob?.cancel()
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
             }
             ACTION_RELEASE -> {
                 endSession("released")
@@ -494,9 +499,13 @@ class AudioCaptureService : Service() {
         shizukuPipe = null
         // A new session must not start until this one's capture is fully released (the
         // Shizuku service has a single capture, and stopping late would kill the new one).
-        stopJob = scope.launch(Dispatchers.IO) {
-            s.stop()
-            runCatching { pipe?.close() }
+        // Enter cleanup immediately, then finish it even if Stop destroys the service
+        // and cancels its scope before the IO dispatcher gets a chance to run.
+        stopJob = scope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+            withContext(Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
+                s.stop()
+                runCatching { pipe?.close() }
+            }
         }
         _state.value = SessionState()
         _streamingState.value = StreamingState(false)

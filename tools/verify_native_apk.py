@@ -7,7 +7,8 @@ import zipfile
 with zipfile.ZipFile(sys.argv[1]) as apk:
     names = apk.namelist()
     for abi in ('arm64-v8a', 'armeabi-v7a', 'x86_64'):
-        name = f'lib/{abi}/libonde_native.so'
+        prefix = 'base/' if 'base/manifest/AndroidManifest.xml' in names else ''
+        name = f'{prefix}lib/{abi}/libonde_native.so'
         assert name in names, f'Missing {name}'
         data = apk.read(name)
         assert data[:4] == b'\x7fELF'

@@ -32,11 +32,8 @@ object StreamController {
     }
 
     fun hasRuntimePermissions(context: Context): Boolean {
-        val needed = buildList {
-            add(Manifest.permission.RECORD_AUDIO)
-            if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        return needed.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+        // Notification permission is optional; denying it must not block audio capture.
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
     }
 
     /** Connects [device], adding it to the current session (multi-room) if one is running. */

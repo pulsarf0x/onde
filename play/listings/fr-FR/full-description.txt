@@ -1,0 +1,24 @@
+Gardez votre téléphone Android et écoutez sur vos enceintes AirPlay.
+
+Onde transmet, sur votre réseau Wi-Fi local, le son des applications Android qui autorisent la capture audio. Choisissez une enceinte dans Onde, acceptez l’autorisation Android et lancez la musique dans votre lecteur habituel.
+
+FONCTIONS
+• Recherche des récepteurs AirPlay sur le réseau local.
+• Diffusion audio, volume des enceintes et jauge du son capturé.
+• Raccourcis vers Deezer, Spotify et YouTube Music lorsqu’ils sont installés.
+• Notification avec arrêt de la diffusion et minuterie.
+• Titre et commandes de lecture lorsque l’accès facultatif aux notifications est accordé.
+• Aide de configuration et diagnostic que vous choisissez de partager.
+
+À SAVOIR AVANT D’UTILISER ONDE
+Le téléphone et le récepteur doivent être connectés au même réseau local. Le HomePod doit avoir été configuré au préalable avec les appareils Apple nécessaires. Les paramètres d’accès AirPlay du domicile doivent autoriser votre connexion.
+
+La compatibilité dépend de votre téléphone, de la version Android, du lecteur musical et du récepteur. Certaines apps et certains contenus refusent la capture audio ; Onde ne contourne pas ces restrictions. Un délai audio est normal : l’application est destinée à l’écoute et ne garantit pas une synchronisation avec la vidéo ou les jeux. Le fonctionnement écran verrouillé dépend également du système Android et de ses réglages.
+
+CONFIDENTIALITÉ
+Pas de compte Onde, pas de publicité ni d’outil d’analyse d’audience. Le son est envoyé aux récepteurs locaux sélectionnés, sans enregistrement dans l’app ni envoi à un serveur de l’éditeur. L’autorisation de capture est nécessaire ; malgré le libellé Android, Onde ne capture pas le microphone physique et n’envoie pas l’image de l’écran. L’accès aux notifications pour les informations musicales est facultatif.
+
+PROJET INDÉPENDANT
+Onde est un logiciel open source sous licence GNU AGPL v3, dérivé de CenturyPlay. Les sources et les notices sont accessibles sur https://github.com/pulsarf0x/onde.
+
+AirPlay et HomePod sont des marques d’Apple. Onde n’est affiliée ni à Apple, ni à Samsung, ni à Deezer, Spotify ou YouTube. La présence de raccourcis vers ces lecteurs ne garantit pas leur compatibilité sur tous les appareils.

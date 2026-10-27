@@ -1,0 +1,15 @@
+Keep your Android phone and listen on your AirPlay speakers.
+
+Onde sends playback audio from Android apps that allow audio capture to compatible receivers on your local Wi-Fi network. Select a receiver, approve Android’s capture prompt and start playback in your usual music app.
+
+Features include local AirPlay discovery, speaker volume controls, a capture level meter, a stop notification, a sleep timer, player shortcuts, optional track information and user-initiated diagnostic sharing.
+
+Your phone and receiver must share a local network. A HomePod must already be configured with the required Apple devices and allow your AirPlay connection.
+
+Compatibility varies by phone, Android version, music app and receiver. Some apps or protected content block audio capture; Onde does not bypass these restrictions. Audio latency is expected. Synchronization with video or games and screen-off playback are not guaranteed.
+
+Onde has no account, ads or analytics SDK. Audio is streamed to the local receivers you choose, not recorded by the app or sent to the developer’s server. Android’s playback-capture permission is required. Onde does not open the physical microphone or transmit screen images. Notification access for track metadata is optional.
+
+Onde is independent open-source software under GNU AGPL v3, derived from CenturyPlay. Source code and license notices: https://github.com/pulsarf0x/onde
+
+AirPlay and HomePod are Apple trademarks. Onde is not affiliated with Apple, Samsung, Deezer, Spotify or YouTube. Player shortcuts do not guarantee compatibility on every device.

@@ -1,0 +1,1 @@
+Version de test 0.2.0 : préparation Android 16, confidentialité intégrée, arrêt explicite de la capture et version standard sans outil privilégié. Compatibilité matérielle en cours de validation.

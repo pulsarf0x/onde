@@ -1,260 +1,50 @@
-# development guide
+# Onde development
 
-## build environment
+## Toolchain
 
-### prerequisites
-- **java jdk 17+** (jdk 21 recommended)
-- **android sdk** with:
-  - platform sdk 35 (android 15)
-  - build tools 35.0.0
-  - platform tools (adb)
+Use JDK 17, Android SDK platform 36, Build Tools 35.0.0 and 36.0.0, NDK 27.2.12479018 and CMake 3.22.1. Gradle 8.11.1 and Android Gradle Plugin 8.10.1 are pinned in the project. Keep machine-specific paths in the environment or ignored local.properties, never in Git.
 
-### linux setup
-
-#### install java
-```bash
-# debian/ubuntu
-sudo apt install openjdk-21-jdk
-
-# verify
-java -version
+```sh
+export JAVA_HOME=/path/to/jdk17
+export ANDROID_HOME=/path/to/android-sdk
+sdkmanager "platforms;android-36" "build-tools;35.0.0" "build-tools;36.0.0" "ndk;27.2.12479018" "cmake;3.22.1" "platform-tools"
+./gradlew assembleDebug assembleRelease bundleRelease testDebugUnitTest testReleaseUnitTest lintDebug lintRelease
 ```
 
-#### install android sdk (option 1: android studio)
-```bash
-# via snap (recommended)
-sudo snap install android-studio --classic
+## Debug versus standard release
 
-# launch android studio and complete setup wizard to download sdk
-# sdk will be installed to ~/Android/Sdk by default
+`src/main` contains shared playback capture and AirPlay code. `src/debug` contains optional Shizuku integration, its provider and privileged capture implementation; Shizuku dependencies are debug-only. `src/release` contains a non-privileged stub so the release never grants itself permissions or uses the Shizuku SDK. The standard release needs Android's capture consent and cannot override source-app restrictions. Release builds also refuse to start the inherited HTTP diagnostic server. Share diagnostics explicitly through Help instead.
+
+The app package is `app.onde.audio`. Debug builds use a debug signing key; `-PondeDebugKeystore=/absolute/private/path` can reuse an existing debug key. Different signing keys cannot update each other in place. Do not automatically uninstall a user's app to resolve a signing mismatch; uninstalling clears local settings.
+
+## Signed Play candidate
+
+```sh
+python3 tools/create_upload_key.py
+source .signing/signing.env
+./gradlew assembleRelease bundleRelease
+python3 tools/verify_native_apk.py app/build/outputs/apk/release/app-release.apk
+python3 tools/verify_release.py app/build/outputs/bundle/release/app-release.aab
 ```
 
-#### install android sdk (option 2: command-line only)
-```bash
-# create sdk directory
-mkdir -p ~/Android/Sdk/cmdline-tools
-cd ~/Android/Sdk/cmdline-tools
+`.signing/` contains sensitive, persistent key material and is ignored by Git. Back it up privately. Never attach it to an issue or PR. CI has no upload key and emits an unsigned AAB; this is intentional. See `play/PUBLISHING.md` for bundletool, signature checks and Console handoff.
 
-# download command-line tools
-wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-unzip commandlinetools-linux-*.zip
-mv cmdline-tools latest
+## Android 16 UI smoke test and screenshots
 
-# add to path (add to ~/.bashrc or ~/.zshrc)
-export ANDROID_HOME=~/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+Use a dedicated emulator, not the owner's physical phone. Install an Android 36 ARM64 image on Apple Silicon (x86_64 on an x86 CI host), then boot it. Set ANDROID_HOME and run:
 
-# accept licenses and install components
-sdkmanager --licenses
-sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+```sh
+python3 tools/smoke_release.py --serial emulator-5580 --offline-screenshots
 ```
 
-#### build command (linux)
-```bash
-cd /path/to/centuryplay
-chmod +x gradlew   # first time only
-./gradlew assembleDebug
-```
+The script refuses non-emulator serials. It installs the signed release, opens main/settings/help/privacy, checks for crashes and captures the actual UI. Offline screenshots avoid leaking real LAN receiver names and addresses. Results stay under ignored `work/emulator-smoke/`. These checks do not validate audio capture, network transport or any physical HomePod. Never use upstream screenshots as screenshots of Onde.
 
-apk location: `app/build/outputs/apk/debug/app-debug.apk`
+`tools/render_store_assets.swift` exports the existing mark to a 512px RGBA icon and a 1024×500 RGB feature graphic on macOS. `tools/export_store_screenshots.swift` makes lossless opaque RGB exports of real emulator screenshots. No synthetic receiver/playback states are used. Asset dimensions and sources are recorded in `play/graphics/manifest.json`.
 
-### macos setup
+## Privacy and website
 
-#### install prerequisites (homebrew)
-```bash
-# install homebrew if not already present
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+`app/src/main/assets/privacy-fr.txt` is the canonical policy, displayed offline in PrivacyActivity. Run `python3 tools/sync_privacy_site.py` after editing it. `site/` is deployed through the Privacy website GitHub Actions workflow when main changes. No trackers, external scripts or forms are included. Review all privacy/Data safety statements against implementation before submitting an update.
 
-# install java and android tools
-brew install openjdk@17 android-commandlinetools android-platform-tools
-```
+## Protocol and hardware checks
 
-#### environment setup (zsh)
-add the following to your `~/.zshrc`:
-```bash
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-```
-
-#### build command
-```bash
-./gradlew assembleDebug --no-daemon
-```
-
-### windows setup
-
-#### prerequisites
-- android studio installed (includes jdk and sdk)
-
-#### build command (powershell)
-```powershell
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-.\gradlew.bat assembleDebug --no-daemon
-```
-
----
-
-## deployment & debugging
-
-### install apk
-
-#### linux
-```bash
-# uninstall previous version (optional, clears app state)
-adb uninstall app.onde.audio
-
-# install debug apk
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
-
-#### macos
-```bash
-# install debug apk
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
-
-#### windows (powershell)
-```powershell
-# uninstall
-.\platform-tools\adb.exe uninstall app.onde.audio
-
-# install debug apk
-.\platform-tools\adb.exe install app\build\outputs\apk\debug\app-debug.apk
-```
-
-### logging
-
-#### linux / macos
-```bash
-# adb logcat (last 2000 lines)
-adb logcat -d -t 2000
-
-# filter for app logs
-adb logcat -d -t 2000 | grep -E "AirPlay|RAOP|AudioCapture|RaopClient"
-```
-
-#### windows (powershell)
-```powershell
-.\platform-tools\adb.exe logcat -d -t 2000 | Select-String -Pattern "AirPlay|RAOP|AudioCapture"
-```
-
-### web log server
-the app runs a web server for viewing logs in real-time:
-- url: `http://<PHONE_IP>:8080/`
-
----
-
-## docker testing environment
-
-### **shairport-sync (local airplay receiver)**
-
-the project includes a `docker-compose.yml` for running a local airplay receiver using [shairport-sync](https://github.com/mikebrady/shairport-sync).
-
-#### prerequisites
-- docker desktop for windows with wsl2 backend
-- linux (in wsl2) for full mdns support
-
-#### start the airplay receiver
-```bash
-# in wsl2 terminal, navigate to project directory
-cd /mnt/c/Users/g8row/Documents/airplay
-
-# start shairport-sync
-docker compose up -d
-
-# view logs
-docker compose logs -f shairport-sync
-```
-
-#### windows limitations
-- **mdns discovery**: host networking doesn't work the same on windows/wsl2. the container may not be discoverable automatically.
-- **workaround**: run shairport-sync directly in wsl2 without docker, or use a linux vm.
-
-#### wsl2 native install (alternative)
-```bash
-# in wsl2 ubuntu
-sudo apt-get update
-sudo apt-get install shairport-sync
-
-# run with debug output (dummy - no audio)
-shairport-sync -v --statistics -o dummy
-
-# run with actual audio (pulseaudio - requires wslg or pulseaudio server)
-shairport-sync -v --statistics -o pa
-```
-
-#### linux/laptop setup (with audio output)
-on a real linux machine or laptop with speakers:
-```bash
-# install
-sudo apt-get update
-sudo apt-get install shairport-sync pulseaudio
-
-# start pulseaudio if not running
-pulseaudio --start
-
-# run shairport-sync with pulseaudio output
-shairport-sync --name="Laptop-AirPlay" -v -o pa
-
-# or with alsa (direct to sound card, no pulseaudio)
-shairport-sync --name="Laptop-AirPlay" -v -o alsa
-```
-
-**port forwarding** (if behind nat/firewall):
-- port 5000/tcp (rtsp)
-- ports 6000-6010/udp (rtp audio)
-
----
-
-## traffic capture & analysis
-
-### **capture airplay traffic**
-
-#### using docker (linux/wsl2)
-```bash
-# start capture container alongside shairport
-docker compose --profile capture up -d
-
-# captures are saved to ./captures/
-```
-
-#### using wireshark on windows
-1. open wireshark
-2. select your network interface (wifi or ethernet)
-3. apply filter: `tcp.port == 7000 or tcp.port == 5000 or udp.port == 5353`
-4. start capture
-5. cast audio from apple music or this app to an airplay device
-
-#### analyzing apple music traffic
-the apple music windows app supports airplay. to analyze its traffic:
-
-1. start wireshark capture
-2. open apple music and play audio
-3. click the airplay icon and select a device
-4. observe the traffic in wireshark
-5. look for:
-   - http requests to port 7000 (airplay 2 control)
-   - rtsp requests to port 5000 (airplay 1/raop)
-   - tlv8-encoded pairing data
-
-### **useful wireshark filters**
-```
-# all airplay traffic
-tcp.port == 7000 or tcp.port == 5000
-
-# mdns discovery
-udp.port == 5353
-
-# rtp audio packets
-udp.portrange 6000-6005
-
-# pair-setup/verify
-http.request.uri contains "pair"
-```
-
----
-
-## protocol documentation
-see [docs/airplay_protocol.md](docs/AIRPLAY_PROTOCOL.md) for detailed protocol documentation.
+See AGENTS.md, docs/RESEARCH_AND_ROADMAP.md and the protocol notes. AirPlay 1 RSA and AirPlay 2 HAP/transient selection are covered by unit tests, not by a universal receiver guarantee. FairPlay-only paths are unsupported. Use file-writing software receivers for experiments, and never play audible test tones on real speakers at night. Galaxy S23/HomePod mini tests remain a separate gate in play/HARDWARE_TESTS.md.

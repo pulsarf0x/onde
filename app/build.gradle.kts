@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "app.onde.audio"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "app.onde.audio"
         minSdk = 30  // Android 11+ required for MediaRouter2 (AudioPlaybackCapture needs 10+)
-        targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        targetSdk = 36
+        versionCode = 2
+        versionName = "0.2.0"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
@@ -25,9 +25,9 @@ android {
         }
     }
 
-    // Extract native libraries at install time: compatible with 16 KiB pages on AGP 8.2.
+    // AGP 8.10 packages uncompressed libraries with 16 KiB alignment.
     packaging {
-        jniLibs.useLegacyPackaging = true
+        jniLibs.useLegacyPackaging = false
     }
 
     ndkVersion = "27.2.12479018"
@@ -39,7 +39,25 @@ android {
         }
     }
 
+    val uploadStore = providers.environmentVariable("ONDE_UPLOAD_STORE_FILE").orNull
+    val uploadPassword = providers.environmentVariable("ONDE_UPLOAD_STORE_PASSWORD").orNull
+    val uploadAlias = providers.environmentVariable("ONDE_UPLOAD_KEY_ALIAS").orNull
+    val uploadKeyPassword = providers.environmentVariable("ONDE_UPLOAD_KEY_PASSWORD").orNull
+    val uploadValues = listOf(uploadStore, uploadPassword, uploadAlias, uploadKeyPassword)
+    val hasUploadSigning = uploadValues.all { !it.isNullOrBlank() }
+    check(uploadValues.none { !it.isNullOrBlank() } || hasUploadSigning) {
+        "Release signing requires all four ONDE_UPLOAD_* environment variables."
+    }
+
     signingConfigs {
+        if (hasUploadSigning) {
+            create("upload") {
+                storeFile = rootProject.file(uploadStore!!)
+                storePassword = uploadPassword
+                keyAlias = uploadAlias
+                keyPassword = uploadKeyPassword
+            }
+        }
         getByName("debug") {
             providers.gradleProperty("ondeDebugKeystore").orNull?.let { storeFile = file(it) }
         }
@@ -48,8 +66,12 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            buildConfigField("boolean", "ENABLE_SHIZUKU", "true")
         }
         release {
+            isDebuggable = false
+            buildConfigField("boolean", "ENABLE_SHIZUKU", "false")
+            if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -107,8 +129,8 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.28")
 
     // Shizuku: optional privileged helper (skip consent dialogs, silent-phone capture)
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
+    debugImplementation("dev.rikka.shizuku:api:13.1.5")
+    debugImplementation("dev.rikka.shizuku:provider:13.1.5")
 
     // Unit testing
     testImplementation("junit:junit:4.13.2")

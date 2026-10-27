@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import app.onde.audio.service.AudioCaptureService
 import app.onde.audio.util.LogServer
@@ -19,6 +20,7 @@ class HelpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         DynamicColors.applyToActivityIfAvailable(this)
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(24), dp(20), dp(24), dp(32))
@@ -49,7 +51,7 @@ class HelpActivity : AppCompatActivity() {
                 setOnClickListener { click() }
             })
         }
-        text("Bienvenue dans Onde", "Le son de votre téléphone, sur vos enceintes AirPlay. Gratuit, sans compte et sans limite de durée. Version expérimentale 0.1 : la compatibilité avec le Galaxy S23 et le HomePod mini reste à tester.")
+        text("Bienvenue dans Onde", "Le son de votre téléphone, sur vos enceintes AirPlay. Sans compte et sans limite de durée intégrée. Version de test ${BuildConfig.VERSION_NAME} : la compatibilité avec le Galaxy S23 et le HomePod mini reste à tester.")
         text("1. Le même Wi-Fi", "Connectez le Galaxy et le HomePod au même réseau local. Évitez le réseau invité, qui peut isoler les appareils. Le HomePod doit déjà être configuré.")
         text("2. Autoriser AirPlay", "Sur l’iPhone ou l’iPad qui gère le HomePod : Maison → Réglages du domicile → Haut-parleurs et téléviseurs (le nom peut varier). Autorisez les personnes sur le même réseau. Une restriction aux membres du domicile peut empêcher cette connexion Android.")
         text("3. Choisir le HomePod", "Revenez à l’accueil et touchez votre enceinte. Acceptez la capture audio. Si Android propose de partager une seule app ou tout l’écran, choisissez tout l’écran : cela permet de changer d’app musicale. Onde capture le son de lecture, sans envoyer l’image de l’écran ni enregistrer le microphone.")
@@ -63,6 +65,10 @@ class HelpActivity : AppCompatActivity() {
         }
         text("Diagnostic local", "Les informations techniques restent sur le téléphone. Le bouton ci-dessous ouvre le partage Android : vous choisissez vous-même si vous souhaitez les transmettre. Le rapport contient notamment des adresses réseau et les noms des enceintes.")
         button("Partager un diagnostic") { shareDiagnostics() }
+        button("Confidentialité et données") { startActivity(Intent(this, PrivacyActivity::class.java)) }
+        button("Code source et licences") {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/pulsarf0x/onde")))
+        }
         text("Crédits et licence", "Onde est une adaptation de CenturyPlay (g8row), sous licence GNU AGPL v3. Le codec ALAC provient d’Apple, sous licence Apache 2.0. Les sources complètes et les notices sont fournies avec cette version. AirPlay et HomePod sont des marques d’Apple ; cette application est indépendante.")
         button("Fermer l’aide") { finish() }
     }

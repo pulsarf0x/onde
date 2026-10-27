@@ -16,12 +16,14 @@ Main areas (v2 engine, see `docs/RESEARCH_AND_ROADMAP.md` for design + verified 
 - `docs/`: protocol notes, research and roadmap.
 - `tools/collect_macos_airplay_logs.sh`: helper for collecting macOS AirPlay logs while capturing a reproduction.
 
+Release sources exclude the privileged Shizuku implementation and SDK. `src/debug/` contains developer-only Shizuku components; `src/release/` contains a non-privileged stub. The standard release always uses Android capture consent. Do not make store compatibility or encryption claims without evidence. The Play handoff is in `play/PUBLISHING.md`; source-of-truth privacy text is `app/src/main/assets/privacy-fr.txt`.
+
 ## Build and test
 
 Use JDK 17:
 
 ```bash
-JAVA_HOME=/path/to/jdk17 ./gradlew assembleDebug testDebugUnitTest lintDebug
+JAVA_HOME=/path/to/jdk17 ./gradlew assembleDebug assembleRelease bundleRelease testDebugUnitTest testReleaseUnitTest lintDebug lintRelease
 ```
 
 Install debug APK to the connected Android device:

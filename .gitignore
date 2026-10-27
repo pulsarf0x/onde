@@ -59,3 +59,9 @@ Dockerfile
 *.pem
 .gradle-user-home/
 .kotlin/
+
+# Persistent private release credentials
+.signing/
+work/
+__pycache__/
+*.pyc
